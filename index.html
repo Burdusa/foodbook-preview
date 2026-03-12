@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>FoodBook Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #8B9E6B;
+      --primary-light: #E5EDDB;
+      --background: #FAFAF7;
+      --surface: #FFFFFF;
+      --border: #E8E5DE;
+      --warm-accent: #F0EBE1;
+      --purple-accent: #E8DFF0;
+      --orange-accent: #FDECD8;
+      --text-primary: #2C2C2C;
+      --text-secondary: #555555;
+      --text-muted: #999999;
+      --rating: #D4A853;
+      --shadow: 0 14px 32px rgba(44, 44, 44, 0.08);
+      --radius: 14px;
+      --radius-sm: 12px;
+      --nav-height: 82px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: linear-gradient(180deg, #f7f7f2 0%, var(--background) 24%, #f4f1eb 100%);
+      color: var(--text-primary);
+      font-family: "Inter", sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      background: none;
+      color: inherit;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .phone-shell {
+      width: 100%;
+      max-width: 414px;
+      min-height: 100vh;
+      background: rgba(250, 250, 247, 0.96);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app {
+      min-height: 100vh;
+      padding-bottom: calc(var(--nav-height) + 28px);
+    }
+
+    .screen {
+      display: none;
+      padding: 22px 18px 24px;
+      animation: screenIn 280ms ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes screenIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes spinCard {
+      0% { transform: rotate(0deg) scale(1); opacity: 1; }
+      40% { transform: rotate(8deg) scale(0.94); opacity: 0.8; }
+      100% { transform: rotate(-2deg) scale(1); opacity: 1; }
+    }
+
+    @keyframes splashOut {
+      to {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes checkPop {
+      0% { transform: scale(0.92); }
+      45% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    .splash {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at top left, rgba(139, 158, 107, 0.22), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(232, 223, 240, 0.7), transparent 32%),
+        linear-gradient(180deg, #fcfcf8 0%, #f6f2ea 100%);
+      z-index: 40;
+      animation: splashOut 650ms ease 1.25s forwards;
+    }
+
+    .splash-card {
+      width: calc(100% - 52px);
+      max-width: 290px;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(232, 229, 222, 0.95);
+      border-radius: 26px;
+      padding: 34px 24px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .splash-mark {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--primary) 0%, #9cad80 100%);
+      color: white;
+      font-size: 1.75rem;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    h1, h2, h3 {
+      font-family: "Playfair Display", serif;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+
+    h1 {
+      font-size: 2rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 6px;
+    }
+
+    h3 {
+      font-size: 1.05rem;
+    }
+
+    p {
+      margin: 0;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      font-size: 0.95rem;
+    }
+
+    .topbar, .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--primary) 0%, #a3b48a 100%);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 1.3rem;
+      box-shadow: 0 10px 20px rgba(139, 158, 107, 0.25);
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .stats-row, .quick-actions, .chips, .day-strip, .quick-log {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .stats-row::-webkit-scrollbar,
+    .quick-actions::-webkit-scrollbar,
+    .chips::-webkit-scrollbar,
+    .day-strip::-webkit-scrollbar,
+    .quick-log::-webkit-scrollbar {
+      display: none;
+    }
+
+    .stat-card, .card, .tip-card, .wishlist-item, .activity-item, .tracker-card, .recipe-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 20px rgba(44, 44, 44, 0.04);
+    }
+
+    .stat-card {
+      min-width: 108px;
+      padding: 14px;
+    }
+
+    .stat-card strong {
+      display: block;
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+    }
+
+    .card {
+      padding: 16px;
+      margin-top: 14px;
+    }
+
+    .card.accent-green {
+      background: linear-gradient(180deg, var(--primary-light) 0%, #f7faf1 100%);
+    }
+
+    .card.accent-purple {
+      background: linear-gradient(180deg, var(--purple-accent) 0%, #fbf8fd 100%);
+    }
+
+    .card.accent-orange {
+      background: linear-gradient(180deg, var(--orange-accent) 0%, #fffaf4 100%);
+    }
+
+    .hero-button, .primary-btn, .secondary-btn, .small-btn, .made-btn {
+      border-radius: 14px;
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    .hero-button, .primary-btn {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 14px 24px rgba(139, 158, 107, 0.22);
+    }
+
+    .hero-button {
+      width: 100%;
+      padding: 16px 18px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+    }
+
+    .primary-btn {
+      padding: 12px 16px;
+      font-weight: 600;
+    }
+
+    .secondary-btn, .small-btn {
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+
+    .secondary-btn {
+      padding: 12px 16px;
+      font-weight: 500;
+    }
+
+    .small-btn, .made-btn {
+      padding: 10px 12px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .made-btn {
+      background: rgba(139, 158, 107, 0.12);
+      color: var(--primary);
+    }
+
+    .hero-button:active, .primary-btn:active, .secondary-btn:active, .small-btn:active, .made-btn:active, .fab:active, .recipe-card:active {
+      transform: scale(0.98);
+    }
+
+    .diary-preview, .entry-head, .wishlist-row, .tip-tags, .recipe-meta, .recipe-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .entry-media, .recipe-media {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: var(--warm-accent);
+      font-size: 1.6rem;
+      flex: 0 0 auto;
+    }
+
+    .stars {
+      color: var(--rating);
+      letter-spacing: 0.08em;
+      font-size: 0.9rem;
+    }
+
+    .activity-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .activity-item {
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .activity-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: var(--primary-light);
+      flex: 0 0 auto;
+    }
+
+    .day-pill, .chip, .tag, .badge {
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.67rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .day-pill {
+      min-width: 64px;
+      padding: 12px 10px;
+      border: 1px solid var(--border);
+      background: #fff;
+      text-align: center;
+    }
+
+    .day-pill.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .chip {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.75);
+    }
+
+    .chip.active {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: rgba(139, 158, 107, 0.28);
+    }
+
+    .tag, .badge {
+      padding: 7px 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tag {
+      background: var(--warm-accent);
+      color: var(--text-secondary);
+    }
+
+    .badge.easy { background: #e6f2d8; color: #62803f; }
+    .badge.medium { background: #fceccb; color: #a37711; }
+    .badge.tricky { background: #f6ddd7; color: #a24f37; }
+
+    .search {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      background: #fff;
+      margin: 16px 0 12px;
+      color: var(--text-primary);
+      box-shadow: inset 0 1px 2px rgba(44, 44, 44, 0.02);
+    }
+
+    .recipe-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .recipe-card {
+      padding: 14px;
+    }
+
+    .recipe-card .recipe-media {
+      width: 100%;
+      height: 102px;
+      margin-bottom: 12px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, var(--warm-accent), #fff);
+      font-size: 2rem;
+    }
+
+    .wishlist-banner, .tips-banner, .tracker-banner {
+      padding: 18px;
+      border-radius: 22px;
+      margin-bottom: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wishlist-banner {
+      background: linear-gradient(135deg, var(--purple-accent) 0%, #f7f1fb 100%);
+    }
+
+    .tips-banner {
+      background: linear-gradient(135deg, var(--orange-accent) 0%, #fff7ec 100%);
+    }
+
+    .tracker-banner {
+      background: linear-gradient(135deg, var(--primary-light) 0%, #f3f7ec 100%);
+    }
+
+    .banner-orb {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      right: -20px;
+      top: -30px;
+      background: rgba(255, 255, 255, 0.42);
+    }
+
+    .wishlist-list, .tips-list, .entries-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .wishlist-item, .tip-card {
+      padding: 16px;
+    }
+
+    .wishlist-source {
+      display: inline-block;
+      margin-top: 8px;
+      color: var(--text-muted);
+      font-size: 0.83rem;
+      overflow-wrap: anywhere;
+    }
+
+    .tip-card {
+      background: linear-gradient(180deg, #fff 0%, #fffaf4 100%);
+    }
+
+    .fab {
+      position: fixed;
+      right: max(18px, calc((100vw - 414px) / 2 + 18px));
+      bottom: calc(var(--nav-height) + 22px);
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 1.7rem;
+      box-shadow: 0 18px 28px rgba(139, 158, 107, 0.3);
+      display: grid;
+      place-items: center;
+      z-index: 12;
+    }
+
+    .fab.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 414px;
+      background: rgba(255, 255, 255, 0.95);
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -12px 28px rgba(44, 44, 44, 0.06);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+      z-index: 11;
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-item {
+      display: grid;
+      justify-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+    }
+
+    .nav-item .icon {
+      font-size: 1.15rem;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .calendar-cell {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      min-height: 62px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    .cell-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: auto;
+    }
+
+    .dot.cooked { background: var(--primary); }
+    .dot.ordered { background: #d8b55d; }
+    .dot.skipped { background: #c9c9c9; }
+
+    .legend {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(30, 26, 20, 0.38);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 220ms ease;
+      z-index: 18;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%) translateY(104%);
+      width: 100%;
+      max-width: 414px;
+      max-height: calc(100vh - 28px);
+      background: #fff;
+      border-radius: 28px 28px 0 0;
+      padding: 18px 18px calc(22px + env(safe-area-inset-bottom));
+      transition: transform 260ms ease;
+      z-index: 19;
+      overflow-y: auto;
+      box-shadow: 0 -18px 36px rgba(44, 44, 44, 0.16);
+    }
+
+    .modal.open {
+      transform: translateX(-50%) translateY(0);
+      animation: modalIn 260ms ease;
+    }
+
+    .modal-handle {
+      width: 44px;
+      height: 5px;
+      border-radius: 999px;
+      background: var(--border);
+      margin: 0 auto 14px;
+    }
+
+    .modal-row {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .field input, .field textarea, .field select {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      resize: vertical;
+      background: var(--background);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(var(--nav-height) + 20px);
+      transform: translateX(-50%) translateY(18px);
+      width: calc(100% - 34px);
+      max-width: 360px;
+      background: rgba(44, 44, 44, 0.92);
+      color: #fff;
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-size: 0.9rem;
+      box-shadow: 0 18px 28px rgba(44, 44, 44, 0.18);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 220ms ease, transform 220ms ease;
+      z-index: 25;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .shuffle-card {
+      margin-top: 14px;
+      transform-origin: center;
+    }
+
+    .shuffle-card.spinning {
+      animation: spinCard 520ms ease;
+    }
+
+    .made {
+      animation: checkPop 280ms ease;
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .link-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      padding: 9px 12px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .muted {
+      color: var(--text-muted);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (min-width: 415px) {
+      body {
+        padding: 10px 0;
+      }
+
+      .phone-shell {
+        min-height: calc(100vh - 20px);
+        border-radius: 32px;
+        border: 1px solid rgba(232, 229, 222, 0.9);
+        box-shadow: 0 24px 60px rgba(44, 44, 44, 0.14);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-shell">
+    <div class="splash" id="splash">
+      <div class="splash-card">
+        <div class="splash-mark">🍽️</div>
+        <div class="eyebrow">Cooking journal</div>
+        <h1>FoodBook</h1>
+        <p style="margin-top:8px;">Your week of cooking, cravings, and keeper recipes in one warm little place.</p>
+      </div>
+    </div>
+
+    <div class="app">
+      <main>
+        <section class="screen active" id="screen-home" data-screen="home">
+          <div class="brand">
+            <div class="brand-mark">🍲</div>
+            <div>
+              <div class="eyebrow">Daily kitchen</div>
+              <h2>FoodBook</h2>
+            </div>
+          </div>
+
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Thursday night</p>
+              <h1 style="font-size:1.9rem;">Good evening, Elena 👋</h1>
+            </div>
+            <button class="secondary-btn" data-go-screen="tracker">Tracker</button>
+          </div>
+
+          <div class="stats-row" style="margin-top:16px;">
+            <div class="stat-card">
+              <strong>12</strong>
+              <p>Recipes saved</p>
+            </div>
+            <div class="stat-card">
+              <strong>5 days 🔥</strong>
+              <p>Current streak</p>
+            </div>
+            <div class="stat-card">
+              <strong>3</strong>
+              <p>Still to try</p>
+            </div>
+          </div>
+
+          <div class="card accent-green">
+            <div class="diary-preview">
+              <div>
+                <div class="eyebrow">Today’s diary</div>
+                <h3 style="margin-top:4px;">Pasta Carbonara</h3>
+                <p style="margin-top:6px;">Creamy, peppery, and exactly the right level of indulgent.</p>
+                <div class="stars" style="margin-top:8px;">★★★★★</div>
+              </div>
+              <div class="entry-media">🍝</div>
+            </div>
+            <a class="link-pill" href="#" data-go-screen="diary">Open diary entry →</a>
+          </div>
+
+          <button class="hero-button" id="shuffleButton">
+            <span>What Should I Cook?</span>
+            <span>🎲</span>
+          </button>
+
+          <div class="card shuffle-card" id="shuffleCard">
+            <div class="eyebrow">Tonight’s idea</div>
+            <div class="recipe-header" style="margin-top:10px;">
+              <div>
+                <h3 id="shuffleTitle">Miso Butter Salmon</h3>
+                <p id="shuffleMeta" style="margin-top:6px;">20 min · Medium · Glossy, savory, fast.</p>
+              </div>
+              <div class="entry-media" id="shuffleEmoji">🐟</div>
+            </div>
+          </div>
+
+          <div class="section-head" style="margin-top:22px;">
+            <div>
+              <div class="eyebrow">Recent activity</div>
+              <h2 style="font-size:1.35rem;">Kitchen moments</h2>
+            </div>
+          </div>
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-dot">💜</div>
+              <div>
+                <strong>Added Tiramisu to wishlist</strong>
+                <p>Saving it for a slow Sunday lunch.</p>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot">🍳</div>
+              <div>
+                <strong>Cooked Chicken Stir-fry</strong>
+                <p>Rated 4 stars and noted “more lime next time”.</p>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot">📖</div>
+              <div>
+                <strong>Logged Matcha Latte</strong>
+                <p>Quick afternoon drink before a video call.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-diary" data-screen="diary">
+          <div class="section-head">
+            <div>
+              <div class="eyebrow">Food diary</div>
+              <h1 style="font-size:1.8rem;">This week’s plates</h1>
+            </div>
+          </div>
+
+          <div class="day-strip" id="dayStrip" style="margin-top:16px;"></div>
+          <div class="chips" id="diaryFilters" style="margin-top:14px;"></div>
+          <div class="entries-list" id="diaryEntries"></div>
+        </section>
+
+        <section class="screen" id="screen-recipes" data-screen="recipes">
+          <div class="section-head">
+            <div>
+              <div class="eyebrow">My recipes</div>
+              <h1 style="font-size:1.8rem;">Cookbook shelf</h1>
+            </div>
+          </div>
+          <input class="search" id="recipeSearch" type="search" placeholder="Search recipes, ingredients, moods...">
+          <div class="chips" id="recipeFilters"></div>
+          <div class="recipe-grid" id="recipeGrid"></div>
+        </section>
+
+        <section class="screen" id="screen-wishlist" data-screen="wishlist">
+          <div class="wishlist-banner">
+            <div class="banner-orb"></div>
+            <div class="eyebrow">Want to try</div>
+            <h1 style="font-size:1.8rem; margin-top:4px;">Your delicious someday list</h1>
+            <p style="margin-top:8px; max-width:250px;">Recipes from blogs, videos, and late-night rabbit holes, all parked in one place.</p>
+          </div>
+
+          <div class="quick-actions">
+            <button class="primary-btn" id="excelImport">Import from Excel</button>
+            <button class="secondary-btn" data-go-screen="recipes">Browse recipes</button>
+          </div>
+
+          <div class="wishlist-list" id="wishlistList"></div>
+        </section>
+
+        <section class="screen" id="screen-tips" data-screen="tips">
+          <div class="tips-banner">
+            <div class="banner-orb"></div>
+            <div class="eyebrow">Tips & tricks</div>
+            <h1 style="font-size:1.8rem; margin-top:4px;">Small kitchen wins</h1>
+            <p style="margin-top:8px; max-width:260px;">Quick reminders that make weekday cooking easier and desserts less chaotic.</p>
+          </div>
+          <div class="tips-list" id="tipsList"></div>
+        </section>
+
+        <section class="screen" id="screen-tracker" data-screen="tracker">
+          <div class="tracker-banner">
+            <div class="banner-orb"></div>
+            <div class="eyebrow">Cooking tracker</div>
+            <h1 style="font-size:1.8rem; margin-top:4px;">March 2026</h1>
+            <p style="margin-top:8px;">🔥 <strong id="streakCount">5 days</strong> cooking streak!</p>
+            <a class="link-pill" href="#" data-go-screen="home">Back to dashboard →</a>
+          </div>
+
+          <div class="tracker-card card" style="margin-top:0;">
+            <div class="section-head">
+              <div>
+                <div class="eyebrow">Monthly stats</div>
+                <h3>Cooked: <span id="statCooked">18</span> | Ordered: <span id="statOrdered">7</span> | Skipped: <span id="statSkipped">5</span></h3>
+              </div>
+            </div>
+            <div class="quick-log" style="margin-top:14px;">
+              <button class="primary-btn" data-log-status="cooked">🍳 Cooked</button>
+              <button class="secondary-btn" data-log-status="ordered">📦 Ordered</button>
+              <button class="secondary-btn" data-log-status="skipped">⏭️ Skipped</button>
+            </div>
+            <div class="legend">
+              <span><i class="dot cooked"></i> Cooked</span>
+              <span><i class="dot ordered"></i> Ordered</span>
+              <span><i class="dot skipped"></i> Skipped</span>
+            </div>
+            <div class="calendar-grid" id="trackerGrid"></div>
+          </div>
+        </section>
+      </main>
+
+      <button class="fab" id="globalFab" aria-label="Add new item">＋</button>
+
+      <nav class="bottom-nav" id="bottomNav">
+        <button class="nav-item active" data-screen-target="home"><span class="icon">🏠</span><span>Home</span></button>
+        <button class="nav-item" data-screen-target="diary"><span class="icon">📖</span><span>Diary</span></button>
+        <button class="nav-item" data-screen-target="recipes"><span class="icon">👩‍🍳</span><span>Recipes</span></button>
+        <button class="nav-item" data-screen-target="wishlist"><span class="icon">💜</span><span>Wishlist</span></button>
+        <button class="nav-item" data-screen-target="tips"><span class="icon">💡</span><span>Tips</span></button>
+      </nav>
+    </div>
+
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+
+    <section class="modal" id="formModal" aria-hidden="true">
+      <div class="modal-handle"></div>
+      <div class="section-head">
+        <div>
+          <div class="eyebrow" id="formModalEyebrow">Add new</div>
+          <h2 id="formModalTitle">Quick add</h2>
+        </div>
+        <button class="secondary-btn" data-close-modal>Close</button>
+      </div>
+      <div class="modal-row">
+        <div class="field">
+          <label for="mockTitle">Title</label>
+          <input id="mockTitle" type="text" placeholder="Chocolate tart">
+        </div>
+        <div class="field">
+          <label for="mockCategory">Category</label>
+          <select id="mockCategory">
+            <option>Main Course</option>
+            <option>Desserts</option>
+            <option>Drinks</option>
+            <option>Appetisers</option>
+            <option>Pastry</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="mockNotes">Notes</label>
+          <textarea id="mockNotes" rows="4" placeholder="Soft launch modal for Elena’s feedback."></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="primary-btn" id="saveMockEntry">Save mock entry</button>
+        <button class="secondary-btn" data-close-modal>Cancel</button>
+      </div>
+    </section>
+
+    <section class="modal" id="recipeModal" aria-hidden="true">
+      <div class="modal-handle"></div>
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">Recipe details</div>
+          <h2 id="recipeModalTitle">Recipe</h2>
+        </div>
+        <button class="secondary-btn" data-close-modal>Close</button>
+      </div>
+      <div id="recipeModalBody" style="margin-top:14px;"></div>
+    </section>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script>
+    const diaryData = [
+      {
+        key: "mon",
+        label: "Mon",
+        day: "09",
+        entries: [
+          { emoji: "🍲", title: "Chicken Stir-fry", description: "Crunchy peppers, jasmine rice, lime at the end.", rating: 4, time: "19:10", category: "Main Course" },
+          { emoji: "🍵", title: "Matcha Latte", description: "Oat milk, whisked smooth.", rating: 5, time: "15:20", category: "Drinks" }
+        ]
+      },
+      {
+        key: "tue",
+        label: "Tue",
+        day: "10",
+        entries: [
+          { emoji: "🍰", title: "Mini Basque Cheesecake", description: "Caramelized top, chilled overnight.", rating: 5, time: "21:00", category: "Desserts" }
+        ]
+      },
+      {
+        key: "wed",
+        label: "Wed",
+        day: "11",
+        entries: [
+          { emoji: "🥗", title: "Halloumi Salad", description: "Mint, cucumber, peaches, lemon.", rating: 4, time: "13:05", category: "Appetisers" }
+        ]
+      },
+      {
+        key: "thu",
+        label: "Thu",
+        day: "12",
+        entries: [
+          { emoji: "🍝", title: "Pasta Carbonara", description: "Silky sauce with lots of black pepper.", rating: 5, time: "20:15", category: "Main Course" },
+          { emoji: "📷", title: "Add photo memory", description: "Tap the plus button to mock a fresh diary entry.", rating: 0, time: "20:18", category: "All" }
+        ]
+      },
+      {
+        key: "fri",
+        label: "Fri",
+        day: "13",
+        entries: [
+          { emoji: "🥐", title: "Ham & Gruyere Croissant", description: "Still warm from the oven.", rating: 4, time: "08:40", category: "Pastry" }
+        ]
+      },
+      {
+        key: "sat",
+        label: "Sat",
+        day: "14",
+        entries: [
+          { emoji: "🍸", title: "Citrus Spritz", description: "Bright, bubbly, grapefruit peel.", rating: 4, time: "18:30", category: "Drinks" }
+        ]
+      },
+      {
+        key: "sun",
+        label: "Sun",
+        day: "15",
+        entries: [
+          { emoji: "🍮", title: "Tiramisu Cups", description: "Espresso-soaked and very worth it.", rating: 5, time: "16:00", category: "Desserts" }
+        ]
+      }
+    ];
+
+    const recipeData = [
+      {
+        id: 1,
+        emoji: "🐟",
+        title: "Miso Butter Salmon",
+        difficulty: "Medium",
+        time: "20 min",
+        rating: 4.8,
+        category: "Main Course",
+        servings: 2,
+        description: "Sticky-glazed salmon with spring onions and sesame rice.",
+        ingredients: ["2 salmon fillets", "1 tbsp white miso", "1 tbsp butter", "2 tsp soy sauce", "1 tsp honey", "2 spring onions", "2 cups cooked rice"],
+        steps: ["Whisk miso, melted butter, soy sauce, and honey.", "Brush salmon and roast at 220C for 10 to 12 minutes.", "Reduce remaining glaze in a small pan until glossy.", "Serve over rice and top with spring onions."],
+        notes: "Works brilliantly with asparagus or tenderstem broccoli."
+      },
+      {
+        id: 2,
+        emoji: "🍫",
+        title: "Dark Chocolate Tart",
+        difficulty: "Tricky",
+        time: "1 hr 10 min",
+        rating: 4.9,
+        category: "Desserts",
+        servings: 8,
+        description: "A crisp shell with a silky ganache center and flaky salt.",
+        ingredients: ["1 tart shell", "200 g dark chocolate", "180 ml double cream", "35 g butter", "Flaky sea salt", "Cocoa powder"],
+        steps: ["Bake and cool the tart shell.", "Heat cream until steaming, then pour over chopped chocolate and butter.", "Stir until smooth, then fill shell.", "Chill until set and finish with salt and cocoa."],
+        notes: "Best sliced with a hot knife."
+      },
+      {
+        id: 3,
+        emoji: "🥤",
+        title: "Mango Lassi Float",
+        difficulty: "Easy",
+        time: "8 min",
+        rating: 4.6,
+        category: "Drinks",
+        servings: 2,
+        description: "A thick mango yogurt drink topped with vanilla ice cream.",
+        ingredients: ["1 ripe mango", "200 g Greek yogurt", "120 ml milk", "Cardamom", "Ice", "Vanilla ice cream"],
+        steps: ["Blend mango, yogurt, milk, cardamom, and ice until smooth.", "Pour into tall glasses.", "Top each glass with a scoop of vanilla ice cream."],
+        notes: "Frozen mango makes it extra thick."
+      },
+      {
+        id: 4,
+        emoji: "🥗",
+        title: "Whipped Feta Peppers",
+        difficulty: "Easy",
+        time: "18 min",
+        rating: 4.5,
+        category: "Appetisers",
+        servings: 4,
+        description: "Roasted peppers over whipped feta with hot honey.",
+        ingredients: ["3 sweet peppers", "150 g feta", "3 tbsp Greek yogurt", "1 lemon", "Hot honey", "Mint leaves"],
+        steps: ["Roast the peppers until blistered.", "Blend feta, yogurt, and lemon zest until creamy.", "Spread whipped feta onto a plate.", "Pile peppers on top and finish with hot honey and mint."],
+        notes: "Serve with toasted sourdough."
+      },
+      {
+        id: 5,
+        emoji: "🥐",
+        title: "Brown Butter Kouign-Amann",
+        difficulty: "Tricky",
+        time: "3 hrs",
+        rating: 4.7,
+        category: "Pastry",
+        servings: 6,
+        description: "Caramelized laminated pastry with deep nutty butter notes.",
+        ingredients: ["300 g flour", "7 g yeast", "180 ml water", "200 g butter", "160 g sugar", "Pinch of salt"],
+        steps: ["Mix and rest the dough.", "Laminate with chilled brown butter.", "Fold in sugar during final turns.", "Shape, proof, and bake until deeply caramelized."],
+        notes: "Messy, dramatic, and absolutely worth a weekend."
+      }
+    ];
+
+    const wishlistData = [
+      { title: "Ottolenghi-style Roast Aubergine", url: "https://example.com/ottolenghi-aubergine", category: "Main Course" },
+      { title: "Classic Tiramisu Tray", url: "https://example.com/tiramisu-tray", category: "Desserts" },
+      { title: "Yuzu Lemonade Slush", url: "https://example.com/yuzu-slush", category: "Drinks" },
+      { title: "Spicy Vodka Rigatoni", url: "https://example.com/vodka-rigatoni", category: "Main Course" },
+      { title: "Burrata Peach Crostini", url: "https://example.com/burrata-crostini", category: "Appetisers" },
+      { title: "Pistachio Morning Buns", url: "https://example.com/pistachio-buns", category: "Pastry" }
+    ];
+
+    const tipsData = [
+      { title: "How to keep herbs fresh", preview: "Trim the stems, stand them in a jar of water, and loosely tent with a produce bag before refrigerating.", tags: ["Storage", "Prep"] },
+      { title: "Perfect rice every time", preview: "Rinse until clear, toast lightly in oil, then let it steam off the heat for 10 quiet minutes.", tags: ["Basics", "Texture"] },
+      { title: "Faster caramelized onions", preview: "Use a wider pan than you think, salt early, and add a splash of water to dissolve fond instead of burning it.", tags: ["Weeknight", "Flavor"] },
+      { title: "Better whipped cream stability", preview: "Chill the bowl, use a touch of mascarpone, and stop whipping just before it looks fully done.", tags: ["Desserts", "Technique"] }
+    ];
+
+    const trackerState = [
+      "", "cooked", "ordered", "cooked", "skipped", "cooked", "ordered",
+      "cooked", "cooked", "skipped", "ordered", "cooked", "cooked", "ordered",
+      "skipped", "cooked", "cooked", "ordered", "cooked", "skipped", "ordered",
+      "cooked", "skipped", "cooked", "cooked", "ordered", "cooked", "cooked",
+      "cooked", "cooked", "cooked"
+    ];
+
+    const state = {
+      activeScreen: "home",
+      activeDiaryDay: "thu",
+      diaryFilter: "All",
+      recipeFilter: "All",
+      recipeSearch: "",
+      activeFormContext: "home",
+      toastTimer: null
+    };
+
+    const diaryFilters = ["All", "Main Course", "Desserts", "Drinks"];
+    const recipeFilters = ["All", "Main Course", "Desserts", "Drinks", "Appetisers", "Pastry"];
+
+    const dayStrip = document.getElementById("dayStrip");
+    const diaryEntries = document.getElementById("diaryEntries");
+    const diaryFiltersEl = document.getElementById("diaryFilters");
+    const recipeFiltersEl = document.getElementById("recipeFilters");
+    const recipeGrid = document.getElementById("recipeGrid");
+    const recipeSearch = document.getElementById("recipeSearch");
+    const wishlistList = document.getElementById("wishlistList");
+    const tipsList = document.getElementById("tipsList");
+    const trackerGrid = document.getElementById("trackerGrid");
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const formModal = document.getElementById("formModal");
+    const recipeModal = document.getElementById("recipeModal");
+    const toast = document.getElementById("toast");
+    const globalFab = document.getElementById("globalFab");
+
+    function renderDiary() {
+      dayStrip.innerHTML = diaryData.map(day => `
+        <button class="day-pill ${day.key === state.activeDiaryDay ? "active" : ""}" data-day="${day.key}">
+          <div>${day.label}</div>
+          <strong style="display:block; margin-top:4px;">${day.day}</strong>
+        </button>
+      `).join("");
+
+      diaryFiltersEl.innerHTML = diaryFilters.map(filter => `
+        <button class="chip ${filter === state.diaryFilter ? "active" : ""}" data-diary-filter="${filter}">${filter}</button>
+      `).join("");
+
+      const selectedDay = diaryData.find(day => day.key === state.activeDiaryDay);
+      const items = selectedDay.entries.filter(entry => state.diaryFilter === "All" || entry.category === state.diaryFilter);
+
+      diaryEntries.innerHTML = items.map(entry => `
+        <article class="card">
+          <div class="entry-head">
+            <div style="display:flex; gap:12px; align-items:center;">
+              <div class="entry-media">${entry.emoji}</div>
+              <div>
+                <h3>${entry.title}</h3>
+                <p style="margin-top:6px;">${entry.description}</p>
+                ${entry.rating ? `<div class="stars" style="margin-top:8px;">${"★".repeat(entry.rating)}${"☆".repeat(5 - entry.rating)}</div>` : `<div class="muted" style="margin-top:8px;">Photo placeholder</div>`}
+              </div>
+            </div>
+            <div class="muted" style="font-size:0.8rem;">${entry.time}</div>
+          </div>
+        </article>
+      `).join("") || `<div class="card"><p>No entries for this filter yet. Try another day or add a mock entry.</p></div>`;
+    }
+
+    function difficultyClass(level) {
+      if (level === "Easy") return "easy";
+      if (level === "Medium") return "medium";
+      return "tricky";
+    }
+
+    function renderRecipes() {
+      recipeFiltersEl.innerHTML = recipeFilters.map(filter => {
+        const labelMap = {
+          "Main Course": "🍖 Main Course",
+          "Desserts": "🍰 Desserts",
+          "Drinks": "🥤 Drinks",
+          "Appetisers": "🥗 Appetisers",
+          "Pastry": "🥐 Pastry",
+          "All": "All"
+        };
+        return `<button class="chip ${filter === state.recipeFilter ? "active" : ""}" data-recipe-filter="${filter}">${labelMap[filter]}</button>`;
+      }).join("");
+
+      const filtered = recipeData.filter(recipe => {
+        const matchesFilter = state.recipeFilter === "All" || recipe.category === state.recipeFilter;
+        const matchesSearch = `${recipe.title} ${recipe.category} ${recipe.description}`.toLowerCase().includes(state.recipeSearch.toLowerCase());
+        return matchesFilter && matchesSearch;
+      });
+
+      recipeGrid.innerHTML = filtered.map(recipe => `
+        <button class="recipe-card" data-recipe-id="${recipe.id}">
+          <div class="recipe-media">${recipe.emoji}</div>
+          <div class="badge ${difficultyClass(recipe.difficulty)}">${recipe.difficulty}</div>
+          <h3 style="margin-top:10px;">${recipe.title}</h3>
+          <div class="recipe-meta" style="margin-top:8px; align-items:flex-start;">
+            <div>
+              <p>${recipe.time}</p>
+              <div class="stars" style="margin-top:6px;">${"★".repeat(Math.round(recipe.rating))}</div>
+            </div>
+            <span class="muted" style="font-size:0.8rem;">${recipe.rating.toFixed(1)}</span>
+          </div>
+        </button>
+      `).join("") || `<div class="card" style="grid-column:1/-1;"><p>No recipes match that search yet.</p></div>`;
+    }
+
+    function renderWishlist() {
+      wishlistList.innerHTML = wishlistData.map((item, index) => `
+        <article class="wishlist-item">
+          <div class="wishlist-row">
+            <div>
+              <h3>${item.title}</h3>
+              <span class="wishlist-source">${item.url}</span>
+            </div>
+            <span class="tag">${item.category}</span>
+          </div>
+          <button class="made-btn" data-made-index="${index}" style="margin-top:14px;">✓ Made it!</button>
+        </article>
+      `).join("");
+    }
+
+    function renderTips() {
+      tipsList.innerHTML = tipsData.map(tip => `
+        <article class="tip-card">
+          <div class="eyebrow">Kitchen note</div>
+          <h3 style="margin-top:6px;">${tip.title}</h3>
+          <p style="margin-top:8px;">${tip.preview}</p>
+          <div class="tip-tags" style="margin-top:12px; justify-content:flex-start;">
+            ${tip.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderTracker() {
+      trackerGrid.innerHTML = trackerState.map((status, index) => `
+        <div class="calendar-cell">
+          <div class="cell-top">
+            <span>${index + 1}</span>
+            <span class="muted">${["S","M","T","W","T","F","S"][index % 7]}</span>
+          </div>
+          ${status ? `<div class="dot ${status}"></div>` : `<div></div>`}
+        </div>
+      `).join("");
+
+      const counts = trackerState.reduce((acc, item) => {
+        if (item) acc[item] += 1;
+        return acc;
+      }, { cooked: 0, ordered: 0, skipped: 0 });
+
+      document.getElementById("statCooked").textContent = counts.cooked;
+      document.getElementById("statOrdered").textContent = counts.ordered;
+      document.getElementById("statSkipped").textContent = counts.skipped;
+
+      let streak = 0;
+      for (let i = trackerState.length - 1; i >= 0; i -= 1) {
+        if (trackerState[i] === "cooked") {
+          streak += 1;
+        } else {
+          break;
+        }
+      }
+      document.getElementById("streakCount").textContent = streak || 0;
+    }
+
+    function showScreen(screen) {
+      state.activeScreen = screen;
+      document.querySelectorAll(".screen").forEach(section => {
+        section.classList.toggle("active", section.dataset.screen === screen);
+      });
+      document.querySelectorAll(".nav-item").forEach(item => {
+        item.classList.toggle("active", item.dataset.screenTarget === screen);
+      });
+      globalFab.classList.toggle("hidden", screen === "home" || screen === "tracker");
+    }
+
+    function openModal(modal) {
+      modalBackdrop.classList.add("open");
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeModal() {
+      modalBackdrop.classList.remove("open");
+      [formModal, recipeModal].forEach(modal => {
+        modal.classList.remove("open");
+        modal.setAttribute("aria-hidden", "true");
+      });
+    }
+
+    function openForm(context) {
+      state.activeFormContext = context;
+      const labels = {
+        diary: ["Food diary", "Add diary entry"],
+        recipes: ["My recipes", "Add recipe card"],
+        wishlist: ["Wishlist", "Save recipe to try"],
+        tips: ["Tips & tricks", "Add kitchen tip"],
+        home: ["Quick add", "Capture an idea"]
+      };
+      const [eyebrow, title] = labels[context] || labels.home;
+      document.getElementById("formModalEyebrow").textContent = eyebrow;
+      document.getElementById("formModalTitle").textContent = title;
+      openModal(formModal);
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(state.toastTimer);
+      state.toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    function renderRecipeModal(recipe) {
+      document.getElementById("recipeModalTitle").textContent = recipe.title;
+      document.getElementById("recipeModalBody").innerHTML = `
+        <div class="recipe-media" style="width:100%; height:160px; border-radius:24px; font-size:3rem; background:linear-gradient(180deg, var(--primary-light), #fff);">${recipe.emoji}</div>
+        <div class="recipe-meta" style="margin-top:14px; justify-content:flex-start; gap:8px; flex-wrap:wrap;">
+          <span class="badge ${difficultyClass(recipe.difficulty)}">${recipe.difficulty}</span>
+          <span class="tag">${recipe.time}</span>
+          <span class="tag">${recipe.servings} servings</span>
+          <span class="tag">${recipe.rating.toFixed(1)} stars</span>
+        </div>
+        <p style="margin-top:14px;">${recipe.description}</p>
+        <div class="card" style="margin-top:16px; padding:14px;">
+          <div class="eyebrow">Ingredients</div>
+          <div style="display:grid; gap:8px; margin-top:10px;">
+            ${recipe.ingredients.map(item => `<p>• ${item}</p>`).join("")}
+          </div>
+        </div>
+        <div class="card" style="padding:14px;">
+          <div class="eyebrow">Steps</div>
+          <div style="display:grid; gap:10px; margin-top:10px;">
+            ${recipe.steps.map((step, idx) => `<p><strong>${idx + 1}.</strong> ${step}</p>`).join("")}
+          </div>
+        </div>
+        <div class="card" style="padding:14px;">
+          <div class="eyebrow">Notes</div>
+          <p style="margin-top:10px;">${recipe.notes}</p>
+        </div>
+      `;
+      openModal(recipeModal);
+    }
+
+    renderDiary();
+    renderRecipes();
+    renderWishlist();
+    renderTips();
+    renderTracker();
+
+    document.getElementById("bottomNav").addEventListener("click", event => {
+      const target = event.target.closest("[data-screen-target]");
+      if (!target) return;
+      showScreen(target.dataset.screenTarget);
+    });
+
+    document.addEventListener("click", event => {
+      const goTarget = event.target.closest("[data-go-screen]");
+      if (goTarget) {
+        event.preventDefault();
+        showScreen(goTarget.dataset.goScreen);
+      }
+
+      const dayTarget = event.target.closest("[data-day]");
+      if (dayTarget) {
+        state.activeDiaryDay = dayTarget.dataset.day;
+        renderDiary();
+      }
+
+      const diaryFilterTarget = event.target.closest("[data-diary-filter]");
+      if (diaryFilterTarget) {
+        state.diaryFilter = diaryFilterTarget.dataset.diaryFilter;
+        renderDiary();
+      }
+
+      const recipeFilterTarget = event.target.closest("[data-recipe-filter]");
+      if (recipeFilterTarget) {
+        state.recipeFilter = recipeFilterTarget.dataset.recipeFilter;
+        renderRecipes();
+      }
+
+      const recipeCard = event.target.closest("[data-recipe-id]");
+      if (recipeCard) {
+        const recipe = recipeData.find(item => item.id === Number(recipeCard.dataset.recipeId));
+        renderRecipeModal(recipe);
+      }
+
+      const madeButton = event.target.closest("[data-made-index]");
+      if (madeButton) {
+        madeButton.classList.add("made");
+        madeButton.textContent = "✓ Logged!";
+        showToast("Marked as made. Nice.");
+      }
+
+      if (event.target.matches("[data-close-modal]") || event.target === modalBackdrop) {
+        closeModal();
+      }
+
+      const logButton = event.target.closest("[data-log-status]");
+      if (logButton) {
+        trackerState[trackerState.length - 1] = logButton.dataset.logStatus;
+        renderTracker();
+        showToast(`Today logged as ${logButton.dataset.logStatus}.`);
+      }
+    });
+
+    recipeSearch.addEventListener("input", event => {
+      state.recipeSearch = event.target.value;
+      renderRecipes();
+    });
+
+    document.getElementById("shuffleButton").addEventListener("click", () => {
+      const recipe = recipeData[Math.floor(Math.random() * recipeData.length)];
+      const card = document.getElementById("shuffleCard");
+      card.classList.remove("spinning");
+      void card.offsetWidth;
+      card.classList.add("spinning");
+      document.getElementById("shuffleTitle").textContent = recipe.title;
+      document.getElementById("shuffleMeta").textContent = `${recipe.time} · ${recipe.difficulty} · ${recipe.description}`;
+      document.getElementById("shuffleEmoji").textContent = recipe.emoji;
+    });
+
+    document.getElementById("excelImport").addEventListener("click", () => {
+      showToast("Excel import ready!");
+    });
+
+    globalFab.addEventListener("click", () => {
+      openForm(state.activeScreen);
+    });
+
+    document.getElementById("saveMockEntry").addEventListener("click", () => {
+      closeModal();
+      showToast("Mock entry saved for prototype feedback.");
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") closeModal();
+    });
+  </script>
+</body>
+</html>
